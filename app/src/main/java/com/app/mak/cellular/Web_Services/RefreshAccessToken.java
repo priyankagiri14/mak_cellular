@@ -1,9 +1,11 @@
 package com.app.mak.cellular.Web_Services;
 
+
 import com.app.mak.cellular.Web_Services.Utils.Pref;
 
 import java.io.IOException;
 
+import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -25,7 +27,13 @@ public class RefreshAccessToken {
 
         final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
-
+        // added query param of deviceType
+        Interceptor clientInterceptor = chain -> {
+            Request request = chain.request();
+            HttpUrl url = request.url().newBuilder().addQueryParameter("deviceType", "MOBILE").build();
+            request = request.newBuilder().url(url).build();
+            return chain.proceed(request);
+        };
         httpClient.addInterceptor(new Interceptor() {
             @Override
             public Response intercept(Interceptor.Chain chain) throws IOException {
@@ -40,6 +48,7 @@ public class RefreshAccessToken {
         })
                 //here we adding Interceptor for full level logging
                 .addNetworkInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                .addInterceptor(clientInterceptor)
                 .build();
         OkHttpClient client = httpClient.build();
 
